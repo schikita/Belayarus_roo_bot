@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: roo-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  bot:
+    build: .
+    container_name: roo-bot
+    restart: always
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    volumes:
+      # чтобы база и другие файлы, которые бот пишет на диск (например bot.db), не терялись
+      - ./data:/app
+    command: ["python", "-m", "main"]
