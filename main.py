@@ -14,6 +14,7 @@ from app.scheduler.scheduler import schedule_jobs
 
 # Импорт всех роутеров
 from app.routers import base, info, feedback, promo, join
+from aiogram.client.default import DefaultBotProperties
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -35,7 +36,10 @@ async def main():
     """
     Главная функция запуска Telegram-бота.
     """
-    bot = Bot(token=settings.bot_token, parse_mode="HTML")
+    bot = Bot(
+        token=settings.bot_token,
+        default=DefaultBotProperties(parse_mode="HTML")
+    )
 
     # Настройка хранилища состояния (Redis или память)
     if settings.redis_url:
