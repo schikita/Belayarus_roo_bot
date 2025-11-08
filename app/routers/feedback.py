@@ -7,6 +7,7 @@ from aiogram.types import Message
 from app.db import session_scope
 from app import models
 from aiogram import Bot
+from aiogram.types import CallbackQuery
 
 router = Router()
 
@@ -17,6 +18,13 @@ BOT_ADMINS = ast.literal_eval(os.getenv("BOT_ADMINS", "[]"))
 class FeedbackFSM(StatesGroup):
     waiting_message = State()
 
+
+@router.callback_query(F.data == "feedback_form")
+async def feedback_start_callback(query: CallbackQuery, state: FSMContext):
+    """Обработчик кнопки 'Обратная связь' в меню."""
+    await state.set_state(FeedbackFSM.waiting_message)
+    await query.message.answer("✉️ Напишите ваше сообщение одним текстом и отправьте.")
+    await query.answer()
 
 @router.message(F.text.in_({'✉️ Обратная связь', '/feedback'}))
 async def feedback_entry(message: Message, state: FSMContext):
