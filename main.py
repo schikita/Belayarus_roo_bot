@@ -1,43 +1,43 @@
 import asyncio
+import logging
+from functools import partial
+
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncEngine
-import logging
 
-from functools import partial
+from app.config import settings
+from app.db import engine, Base
+from app.scheduler.scheduler import schedule_jobs
 
-# Set up logging for the bot
+# Импорт всех роутеров
+from app.routers import base, info, feedback, promo, join
+
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 bot_logger = logging.getLogger(__name__)
 
-# Import all necessary components from your project's subdirectories
-from app.config import settings
-from app.db import engine, Base
-from app.routers import base_router, info_router, feedback_router, promo_router
-from app.scheduler.scheduler import schedule_jobs 
 
 async def on_startup(bot: Bot, engine: AsyncEngine):
     """
-    Performs startup tasks, such as creating database tables.
-    This function will be called automatically by the dispatcher when the bot starts.
+    Создает таблицы БД при запуске (если их ещё нет).
     """
     bot_logger.info("Bot is starting up...")
     async with engine.begin() as conn:
         bot_logger.info("Creating database tables if they do not exist...")
         await conn.run_sync(Base.metadata.create_all)
     bot_logger.info("Startup complete!")
-        
+
+
 async def main():
     """
-    Main function to initialize and start the bot.
+    Главная функция запуска Telegram-бота.
     """
-    # Initialize the bot with its token from settings
-    bot = Bot(token=settings.bot_token)
-    
-    # Configure storage for your bot's state
-    # This checks if you have a Redis URL set up, which is good for larger projects.
+    bot = Bot(token=settings.bot_token, parse_mode="HTML")
+
+    # Настройка хранилища состояния (Redis или память)
     if settings.redis_url:
         try:
             r = redis.from_url(settings.redis_url)
@@ -49,29 +49,31 @@ async def main():
     else:
         storage = MemoryStorage()
         bot_logger.info("Using MemoryStorage.")
-        
-    # Initialize the Dispatcher with the chosen storage
+
     dp = Dispatcher(storage=storage)
-    
-    # Include your routers. These contain all the command and message handlers.
-    dp.include_router(base_router)
-    dp.include_router(info_router)
-    dp.include_router(feedback_router)
-    dp.include_router(promo_router)
-    
-    # Register the startup handler. We use a lambda to pass the necessary arguments.
+
+    # Подключаем все роутеры (важно: порядок не критичен)
+    dp.include_routers(
+        base.router,
+        info.router,
+        feedback.router,
+        promo.router,
+        join.router,
+    )
+
+    # Регистрируем startup-хук
     dp.startup.register(partial(on_startup, bot, engine))
-    
-    # Start the scheduled jobs (like sending a message at a specific time)
+
+    # Запускаем планировщик (если нужен)
     schedule_jobs(bot)
-    
-    # Start polling for updates from Telegram
+
+    # Запуск бота
     bot_logger.info("Starting bot polling...")
     await dp.start_polling(bot)
-    
+
+
 if __name__ == '__main__':
     try:
-        # Run the main function
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
         bot_logger.info("Bot stopped by user.")

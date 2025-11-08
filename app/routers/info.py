@@ -1,15 +1,53 @@
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from app.utils.docx_to_html import docx_to_html
 
 router = Router()
 
-INFO_TEXT = (
-    'Справочная информация:\n'
-    '- Контакты: ...\n'
-    '- Адреса отделений ...\n'
-    '- Частые вопросы: ...'
-)
+# --- Меню "Информация" ---
+def get_info_keyboard() -> InlineKeyboardMarkup:
+    kb = [
+        [InlineKeyboardButton(text="О нас", callback_data="info_about")],
+        [InlineKeyboardButton(text="Наши инициативы", callback_data="info_initiatives")],
+        [InlineKeyboardButton(text="Прием граждан", callback_data="info_citizens")],
+        [InlineKeyboardButton(text="Устав (PDF)", callback_data="info_statute")],
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="main_menu")],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=kb)
 
-@router.message(F.text.in_({'ℹ️ Справка', '/info'}))
-async def  info(message: Message):
-    await message.answer(INFO_TEXT)
+
+@router.callback_query(F.data == "info_menu")
+async def info_menu(query: CallbackQuery):
+    await query.message.edit_text("📘 Выберите раздел:", reply_markup=get_info_keyboard())
+
+
+# --- Отдельные документы ---
+@router.callback_query(F.data == "info_about")
+async def info_about(query: CallbackQuery):
+    html = docx_to_html("data/О нас.docx")
+    await query.message.answer(html, parse_mode="HTML")
+
+
+@router.callback_query(F.data == "info_initiatives")
+async def info_initiatives(query: CallbackQuery):
+    html = docx_to_html("data/Наши инициативы.docx")
+    await query.message.answer(html, parse_mode="HTML")
+
+
+@router.callback_query(F.data == "info_citizens")
+async def info_citizens(query: CallbackQuery):
+    html = docx_to_html("data/Прием граждан.docx")
+    await query.message.answer(html, parse_mode="HTML")
+
+
+@router.callback_query(F.data == "info_statute")
+async def info_statute(query: CallbackQuery):
+    """
+    Отправляет PDF-файл Устава пользователю.
+    """
+    try:
+        pdf_path = "data/Устав РОО «Белая Русь».pdf"
+        with open(pdf_path, "rb") as pdf_file:
+            await query.message.answer_document(pdf_file, caption="📜 Устав РОО «Белая Русь»")
+    except FileNotFoundError:
+        await query.message.answer("⚠️ Файл Устава временно недоступен. Попробуйте позже.")
