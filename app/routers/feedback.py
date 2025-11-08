@@ -48,7 +48,8 @@ async def feedback_save(message: Message, state: FSMContext, bot: Bot):
                 username=message.from_user.username
             )
             s.add(user)
-        fb = models.FeedBack(user_id=message.from_user.id, message=text)
+        fb = models.Feedback(user_id=message.from_user.id, message=text)
+
         s.add(fb)
 
     await state.clear()
