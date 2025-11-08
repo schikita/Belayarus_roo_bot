@@ -2,6 +2,7 @@ import re
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, InputFile
 from app.utils.docx_to_html import docx_to_html
+from aiogram.types import FSInputFile
 
 router = Router()
 
@@ -50,10 +51,15 @@ async def info_citizens(query: CallbackQuery):
 
 @router.callback_query(F.data == "info_statute")
 async def info_statute(query: CallbackQuery):
-    """Отправляет PDF-файл Устава пользователю."""
+    """
+    Отправляет PDF-файл Устава пользователю.
+    """
+    pdf_path = "data/Устав РОО «Белая Русь».pdf"
+
     try:
-        pdf_path = "data/Устав РОО «Белая Русь».pdf"
-        pdf_file = InputFile(pdf_path)
+        pdf_file = FSInputFile(pdf_path)
         await query.message.answer_document(pdf_file, caption="📜 Устав РОО «Белая Русь»")
     except FileNotFoundError:
         await query.message.answer("⚠️ Файл Устава временно недоступен. Попробуйте позже.")
+    except Exception as e:
+        await query.message.answer(f"⚠️ Ошибка при отправке файла: {e}")
