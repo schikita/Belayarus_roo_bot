@@ -1,3 +1,4 @@
+import re
 from docx import Document
 from pathlib import Path
 
@@ -26,3 +27,16 @@ def docx_to_html(file_path: str) -> str:
             html.append(f"<p>{text}</p>")
 
     return "\n".join(html)
+
+
+
+def sanitize_html(text: str) -> str:
+    """
+    Удаляет HTML-теги, которые Telegram не поддерживает.
+    Разрешает только безопасные теги (<b>, <i>, <u>, <a>, <code>, <pre>).
+    """
+    # Удаляем все теги кроме разрешённых
+    text = re.sub(r"</?(?!b|i|u|a|code|pre)[^>]+>", "", text)
+    # Удаляем пустые абзацы и лишние пробелы
+    text = re.sub(r"\s+", " ", text).strip()
+    return text

@@ -1,6 +1,8 @@
+import re
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from app.utils.docx_to_html import docx_to_html
+from app.utils.docx_to_html import docx_to_html, sanitize_html
+
 
 router = Router()
 
@@ -24,23 +26,28 @@ async def join_menu(query: CallbackQuery):
 # --- Отдельные документы ---
 @router.callback_query(F.data == "join_accept")
 async def join_accept(query: CallbackQuery):
-    html = docx_to_html("data/Инструкция о приеме в члены.doc")
+    html = docx_to_html("data/Инструкция о приеме в члены.docx")
+    html = sanitize_html(html)
     await query.message.answer(html, parse_mode="HTML")
 
 
 @router.callback_query(F.data == "join_card")
 async def join_card(query: CallbackQuery):
-    html = docx_to_html("data/Инструкция о членском билете.doc")
+    html = docx_to_html("data/Инструкция о членском билете.docx")
+    html = sanitize_html(html)
     await query.message.answer(html, parse_mode="HTML")
 
 
 @router.callback_query(F.data == "join_payment")
 async def join_payment(query: CallbackQuery):
     html = docx_to_html("data/Инструкция об уплате членских взносов.docx")
+    html = sanitize_html(html)
     await query.message.answer(html, parse_mode="HTML")
 
 
 @router.callback_query(F.data == "join_registry")
 async def join_registry(query: CallbackQuery):
-    html = docx_to_html("data/Инструкция об учетной карточке.doc")
+    html = docx_to_html("data/Инструкция об учетной карточке.docx")
+    html = sanitize_html(html)
     await query.message.answer(html, parse_mode="HTML")
+
