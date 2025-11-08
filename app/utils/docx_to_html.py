@@ -32,11 +32,27 @@ def docx_to_html(file_path: str) -> str:
 
 def sanitize_html(text: str) -> str:
     """
-    Удаляет HTML-теги, которые Telegram не поддерживает.
-    Разрешает только безопасные теги (<b>, <i>, <u>, <a>, <code>, <pre>).
+    Чистит HTML от неподдерживаемых тегов Telegram и исправляет разметку.
     """
-    # Удаляем все теги кроме разрешённых
+
+    # Заменяем <br> и <br > на переносы строк
+    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
+
+    # Удаляем теги <p>, <div>, <span> и их закрывающие версии
+    text = re.sub(r"</?(p|div|span|font|strong|em)[^>]*>", "", text, flags=re.IGNORECASE)
+
+    # Удаляем любые другие HTML-теги, кроме разрешённых Telegram
     text = re.sub(r"</?(?!b|i|u|a|code|pre)[^>]+>", "", text)
-    # Удаляем пустые абзацы и лишние пробелы
-    text = re.sub(r"\s+", " ", text).strip()
+
+    # Исправляем незакрытые теги <b>, <i> и т.п.
+    text = re.sub(r"<b>([^<]*)$", r"<b>\1</b>", text)
+    text = re.sub(r"<i>([^<]*)$", r"<i>\1</i>", text)
+    text = re.sub(r"<u>([^<]*)$", r"<u>\1</u>", text)
+
+    # Удаляем множественные переводы строк
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    # Убираем пробелы в начале и конце
+    text = text.strip()
+
     return text
