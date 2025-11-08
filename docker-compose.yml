@@ -18,5 +18,5 @@ services:
       - .env
     volumes:
       # чтобы база и другие файлы, которые бот пишет на диск (например bot.db), не терялись
-      - ./data:/app
+      - ./data:/app/data
     command: ["python", "-m", "main"]
