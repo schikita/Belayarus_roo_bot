@@ -56,3 +56,20 @@ def sanitize_html(text: str) -> str:
     text = text.strip()
 
     return text
+
+def split_message(text: str, limit: int = 4000) -> list[str]:
+    """
+    Разбивает длинный текст на части, чтобы не превышать лимит Telegram (4096 символов).
+    Разбивает по строкам или пробелам, не обрезая слова.
+    """
+    parts = []
+    while len(text) > limit:
+        split_index = text.rfind('\n', 0, limit)
+        if split_index == -1:
+            split_index = text.rfind(' ', 0, limit)
+        if split_index == -1:
+            split_index = limit
+        parts.append(text[:split_index].strip())
+        text = text[split_index:].strip()
+    parts.append(text)
+    return parts
