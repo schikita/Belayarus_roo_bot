@@ -1,23 +1,27 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    Message,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 
 router = Router()
 
 main_kb = InlineKeyboardMarkup(
     inline_keyboard=[
         [
-            InlineKeyboardButton(text='ℹ️ Информация', callback_data='info_menu'),
-            InlineKeyboardButton(text='🧾 Вступить в РОО', callback_data='join_menu')
+            InlineKeyboardButton(text="ℹ️ Информация", callback_data="info_menu"),
+            InlineKeyboardButton(text="🧾 Вступить в РОО", callback_data="join_menu"),
         ],
+        [InlineKeyboardButton(text="✉️ Обратная связь", callback_data="feedback_form")],
         [
-            InlineKeyboardButton(text='✉️ Обратная связь', callback_data='feedback_form')
-        ],
-        [
-            InlineKeyboardButton(text='📅 Мероприятия', callback_data='events'),
-            InlineKeyboardButton(text='📜 Устав', callback_data='info_statute')
+            InlineKeyboardButton(text="📅 Мероприятия", callback_data="events"),
+            InlineKeyboardButton(text="📜 Устав", callback_data="info_statute"),
         ],
     ],
 )
+
 
 @router.message(F.text == "/start")
 async def cmd_start(message: Message):
@@ -25,7 +29,7 @@ async def cmd_start(message: Message):
         "🇧🇾 Приветствую! Я — официальный бот Республиканского общественного объединения «Белая Русь»!\n\n"
         "Здесь Вы можете узнать о нашей деятельности, ознакомиться с процессом вступления в наши ряды и написать нам сообщение.\n\n"
         "Выберите один из разделов ниже:",
-        reply_markup=main_kb
+        reply_markup=main_kb,
     )
 
 
@@ -42,6 +46,6 @@ async def main_menu_callback(query: CallbackQuery):
         "🇧🇾 Приветствую! Я — официальный бот Республиканского общественного объединения «Белая Русь»!\n\n"
         "Здесь Вы можете узнать о нашей деятельности, ознакомиться с процессом вступления в наши ряды и написать нам сообщение.\n\n"
         "Выберите один из разделов ниже:",
-        reply_markup=main_kb
+        reply_markup=main_kb,
     )
     await query.answer()

@@ -2,6 +2,7 @@ import re
 from docx import Document
 from pathlib import Path
 
+
 def docx_to_html(file_path: str) -> str:
     """Преобразует .docx или .doc в HTML для Telegram."""
     path = Path(file_path)
@@ -29,7 +30,6 @@ def docx_to_html(file_path: str) -> str:
     return "\n".join(html)
 
 
-
 def sanitize_html(text: str) -> str:
     """
     Чистит HTML от неподдерживаемых тегов Telegram и исправляет разметку.
@@ -39,7 +39,9 @@ def sanitize_html(text: str) -> str:
     text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
 
     # Удаляем теги <p>, <div>, <span> и их закрывающие версии
-    text = re.sub(r"</?(p|div|span|font|strong|em)[^>]*>", "", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"</?(p|div|span|font|strong|em)[^>]*>", "", text, flags=re.IGNORECASE
+    )
 
     # Удаляем любые другие HTML-теги, кроме разрешённых Telegram
     text = re.sub(r"</?(?!b|i|u|a|code|pre)[^>]+>", "", text)
@@ -57,6 +59,7 @@ def sanitize_html(text: str) -> str:
 
     return text
 
+
 def split_message(text: str, limit: int = 4000) -> list[str]:
     """
     Разбивает длинный текст на части, чтобы не превышать лимит Telegram (4096 символов).
@@ -64,9 +67,9 @@ def split_message(text: str, limit: int = 4000) -> list[str]:
     """
     parts = []
     while len(text) > limit:
-        split_index = text.rfind('\n', 0, limit)
+        split_index = text.rfind("\n", 0, limit)
         if split_index == -1:
-            split_index = text.rfind(' ', 0, limit)
+            split_index = text.rfind(" ", 0, limit)
         if split_index == -1:
             split_index = limit
         parts.append(text[:split_index].strip())

@@ -1,10 +1,16 @@
 import re
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, InputFile
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    InputFile,
+)
 from app.utils.docx_to_html import docx_to_html
 from aiogram.types import FSInputFile
 
 router = Router()
+
 
 # --- Функция очистки HTML от неподдерживаемых тегов ---
 def sanitize_html(text: str) -> str:
@@ -13,11 +19,16 @@ def sanitize_html(text: str) -> str:
     text = text.replace("&nbsp;", " ")
     return text.strip()
 
+
 # --- Меню "Информация" ---
 def get_info_keyboard() -> InlineKeyboardMarkup:
     kb = [
         [InlineKeyboardButton(text="О нас", callback_data="info_about")],
-        [InlineKeyboardButton(text="Наши инициативы", callback_data="info_initiatives")],
+        [
+            InlineKeyboardButton(
+                text="Наши инициативы", callback_data="info_initiatives"
+            )
+        ],
         [InlineKeyboardButton(text="Прием граждан", callback_data="info_citizens")],
         [InlineKeyboardButton(text="Устав", callback_data="info_statute")],
         [InlineKeyboardButton(text="⬅️ Назад", callback_data="main_menu")],
@@ -27,7 +38,9 @@ def get_info_keyboard() -> InlineKeyboardMarkup:
 
 @router.callback_query(F.data == "info_menu")
 async def info_menu(query: CallbackQuery):
-    await query.message.edit_text("📘 Выберите раздел:", reply_markup=get_info_keyboard())
+    await query.message.edit_text(
+        "📘 Выберите раздел:", reply_markup=get_info_keyboard()
+    )
 
 
 # --- Отдельные документы ---
@@ -58,8 +71,12 @@ async def info_statute(query: CallbackQuery):
 
     try:
         pdf_file = FSInputFile(pdf_path)
-        await query.message.answer_document(pdf_file, caption="📜 Устав РОО «Белая Русь»")
+        await query.message.answer_document(
+            pdf_file, caption="📜 Устав РОО «Белая Русь»"
+        )
     except FileNotFoundError:
-        await query.message.answer("⚠️ Файл Устава временно недоступен. Попробуйте позже.")
+        await query.message.answer(
+            "⚠️ Файл Устава временно недоступен. Попробуйте позже."
+        )
     except Exception as e:
         await query.message.answer(f"⚠️ Ошибка при отправке файла: {e}")

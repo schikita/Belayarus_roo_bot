@@ -8,7 +8,7 @@ SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./sql_app.db"
 
 # Create the asynchronous database engine
 engine: AsyncEngine = create_async_engine(
-    SQLALCHEMY_DATABASE_URL, 
+    SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},
 )
 
@@ -22,6 +22,7 @@ SessionLocal = async_sessionmaker(
 
 # Create the Base class for your models
 Base = declarative_base()
+
 
 # Define the async session_scope context manager
 @asynccontextmanager

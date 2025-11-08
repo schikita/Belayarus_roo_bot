@@ -8,6 +8,7 @@ from app.db import session_scope
 from app import models
 from aiogram import Bot
 from aiogram.types import CallbackQuery
+import html
 
 router = Router()
 
@@ -59,14 +60,16 @@ async def feedback_save(message: Message, state: FSMContext, bot: Bot):
     for admin_id in BOT_ADMINS:
         try:
             user_info = f"@{message.from_user.username}" if message.from_user.username else f"ID: {message.from_user.id}"
+            safe_text = html.escape(text)  # <-- Экранируем потенциально опасные символы
             await bot.send_message(
                 chat_id=admin_id,
                 text=(
-                    f"📬 *Новое сообщение обратной связи:*\n\n"
-                    f"{text}\n\n"
-                    f"👤 От пользователя: {user_info}"
+                    f"📬 <b>Новое сообщение обратной связи:</b>\n\n"
+                    f"{safe_text}\n\n"
+                    f"👤 <b>От пользователя:</b> {user_info}"
                 ),
-                parse_mode="Markdown"
+                parse_mode="HTML"
             )
+            print(f"✅ Сообщение успешно отправлено админу {admin_id}")
         except Exception as e:
             print(f"Не удалось отправить сообщение админу {admin_id}: {e}")

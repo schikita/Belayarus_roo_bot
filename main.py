@@ -36,10 +36,7 @@ async def main():
     """
     Главная функция запуска Telegram-бота.
     """
-    bot = Bot(
-        token=settings.bot_token,
-        default=DefaultBotProperties(parse_mode="HTML")
-    )
+    bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode="HTML"))
 
     # Настройка хранилища состояния (Redis или память)
     if settings.redis_url:
@@ -48,7 +45,9 @@ async def main():
             storage = RedisStorage(r)
             bot_logger.info("Using Redis for storage.")
         except Exception as e:
-            bot_logger.error(f"Failed to connect to Redis, using MemoryStorage. Error: {e}")
+            bot_logger.error(
+                f"Failed to connect to Redis, using MemoryStorage. Error: {e}"
+            )
             storage = MemoryStorage()
     else:
         storage = MemoryStorage()
@@ -76,7 +75,7 @@ async def main():
     await dp.start_polling(bot)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
